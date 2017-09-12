@@ -441,7 +441,7 @@ int nx_v4l2_open_device(int type, int module)
 
 }
 
-int nx_v4l2_cleanup(void)
+void nx_v4l2_cleanup(void)
 {
 	struct nx_v4l2_entry_cache *cache = &_nx_v4l2_entry_cache;
 
