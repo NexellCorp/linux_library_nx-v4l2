@@ -1,3 +1,9 @@
+nx-v4l2 (1.0.3) unstable; urgency=medium
+
+  * modify function return type
+
+ -- Chanho Park <chanho61.park@samsung.com>  Wed, 13 Sep 2017 13:13:28 +0900
+
 nx-v4l2 (1.0.1) unstable; urgency=medium
 
   * Initial release
