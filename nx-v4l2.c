@@ -62,7 +62,7 @@ enum {
 
 #define SYSFS_PATH_SIZE	128
 
-#define MAX_CAMERA_INSTANCE_NUM	3
+#define MAX_CAMERA_INSTANCE_NUM	15
 #define MAX_CSI_INSTANCE_NUM	1
 #define MAX_MPEGTS_INSTANCE_NUM	3
 static struct nx_v4l2_entry_cache {
