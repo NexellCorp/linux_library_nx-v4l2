@@ -626,6 +626,38 @@ int nx_v4l2_set_crop_mmap(int fd, int type, uint32_t x, uint32_t y,
 				      V4L2_BUF_TYPE_VIDEO_CAPTURE);
 }
 
+static int subdev_set_selection(int fd, uint32_t w, uint32_t h)
+{
+	struct v4l2_subdev_selection s;
+
+	bzero(&s, sizeof(struct v4l2_subdev_selection));
+	s.r.left = 0;
+	s.r.top = 0;
+	s.r.width = w;
+	s.r.height = h;
+	return ioctl(fd, VIDIOC_SUBDEV_S_SELECTION, &s);
+}
+
+static int video_set_selection(int fd, uint32_t w, uint32_t h, uint32_t buf_type)
+{
+	struct v4l2_selection s;
+
+	bzero(&s, sizeof(struct v4l2_selection));
+	s.type = buf_type;
+	s.r.left = 0;
+	s.r.top = 0;
+	s.r.width = w;
+	s.r.height = h;
+	return ioctl(fd, VIDIOC_S_SELECTION, &s);
+}
+int nx_v4l2_set_selection(int fd, int type, uint32_t w, uint32_t h)
+{
+	if (get_type_category(type) == type_category_subdev)
+		return subdev_set_selection(fd, w, h);
+	else
+		return video_set_selection(fd, w, h, get_buf_type(type));
+}
+
 static int subdev_get_crop(int fd, uint32_t *x, uint32_t *y, uint32_t *w,
 			   uint32_t *h)
 {

@@ -71,6 +71,7 @@ int nx_v4l2_set_crop(int fd, int type, uint32_t x, uint32_t y, uint32_t w,
 		     uint32_t h);
 int nx_v4l2_get_crop(int fd, int type, uint32_t *x, uint32_t *y, uint32_t *w,
 		     uint32_t *h);
+int nx_v4l2_set_selection(int fd, int type, uint32_t w, uint32_t h);
 int nx_v4l2_set_ctrl(int fd, int type, uint32_t ctrl_id, int value);
 int nx_v4l2_get_ctrl(int fd, int type, uint32_t ctrl_id, int *value);
 int nx_v4l2_set_ext_ctrl(int fd, uint32_t ctrl_id, void *arg);
