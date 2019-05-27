@@ -19,7 +19,6 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -182,7 +181,7 @@ static int get_type_by_name(char *type_name)
 			    strlen(NX_DECIMATOR_VIDEO_NAME))) {
 		return nx_decimator_video;
 	} else {
-		/* fprintf(stderr, "can't find type for name %s\n", type_name); */
+		/* printf("can't find type for name %s\n", type_name); */
 		return -EINVAL;
 	}
 }
@@ -254,7 +253,7 @@ static void enum_camera_sensor(void)
 
 			close(sys_fd);
 			if (size < 0) {
-				fprintf(stderr, "failed to read %s\n",
+				printf("failed to read %s\n",
 					sysfs_path);
 			} else {
 				if (strcmp("no exist", buf)) {
@@ -273,7 +272,8 @@ static void enum_camera_sensor(void)
 					e->exist = true;
 				}
 			}
-		}
+		} else
+			printf("[%s] failed to pen camera sensor info", __func__);
 	}
 }
 
@@ -303,7 +303,7 @@ static int enum_all_v4l2_devices(void)
 			continue;
 
 		if (lstat(items[i]->d_name, &fstat) < 0) {
-			fprintf(stderr, "lstat %s ", items[i]->d_name);
+			printf("lstat %s ", items[i]->d_name);
 			continue;
 		}
 
@@ -314,7 +314,7 @@ static int enum_all_v4l2_devices(void)
 
 		fd = open(entry_sys_path, O_RDONLY);
 		if (fd < 0) {
-			fprintf(stderr, "can't open %s", entry_sys_path);
+			printf("can't open %s", entry_sys_path);
 			continue;
 		}
 
@@ -322,7 +322,7 @@ static int enum_all_v4l2_devices(void)
 		close(fd);
 
 		if (read_count <= 0) {
-			fprintf(stderr, "can't read %s\n", entry_sys_path);
+			printf("can't read %s\n", entry_sys_path);
 			free(items[i]);
 			continue;
 		}
@@ -370,11 +370,11 @@ int nx_v4l2_open_device(int type, int module)
 		int fd = open(entry->devnode, O_RDWR);
 
 		if (fd < 0)
-			fprintf(stderr, "open failed for %s\n", entry->devname);
+			printf("open failed for %s\n", entry->devname);
 
 		return fd;
 	} else {
-		fprintf(stderr, "can't find device for type %d, module %d\n",
+		printf("can't find device for type %d, module %d\n",
 			type, module);
 		return -ENODEV;
 	}
@@ -421,6 +421,12 @@ int nx_v4l2_link(bool link, int module, int src_type, int src_pad,
 	int sink_type, int sink_pad)
 {
 	/* currently not used, just left for build */
+	(void)(link);
+	(void)(module);
+	(void)(src_type);
+	(void)(src_pad);
+	(void)(sink_type);
+	(void)(sink_pad);
 	return 0;
 }
 
@@ -708,6 +714,7 @@ int nx_v4l2_set_ctrl(int fd, int type, uint32_t ctrl_id, int value)
 {
 	struct v4l2_control ctrl;
 
+	(void)(type);
 	bzero(&ctrl, sizeof(ctrl));
 	ctrl.id = ctrl_id;
 	ctrl.value = value;
@@ -720,6 +727,7 @@ int nx_v4l2_get_ctrl(int fd, int type, uint32_t ctrl_id, int *value)
 	int ret;
 	struct v4l2_control ctrl;
 
+	(void)(type);
 	bzero(&ctrl, sizeof(ctrl));
 	ctrl.id = ctrl_id;
 	ret = ioctl(fd, VIDIOC_G_CTRL, &ctrl);
@@ -798,7 +806,7 @@ int nx_v4l2_qbuf(int fd, int type, int plane_num, int index, int *fds,
 		return -EINVAL;
 
 	if (plane_num > MAX_PLANES) {
-		fprintf(stderr, "plane_num(%d) is over MAX_PLANES\n",
+		printf("plane_num(%d) is over MAX_PLANES\n",
 			plane_num);
 		return -EINVAL;
 	}
@@ -843,7 +851,7 @@ int nx_v4l2_dqbuf(int fd, int type, int plane_num, int *index)
 		return -EINVAL;
 
 	if (plane_num > MAX_PLANES) {
-		fprintf(stderr, "plane_num(%d) is over MAX_PLANES\n",
+		printf("plane_num(%d) is over MAX_PLANES\n",
 			plane_num);
 		return -EINVAL;
 	}
@@ -874,7 +882,7 @@ int nx_v4l2_dqbuf_with_timestamp(int fd, int type, int plane_num, int *index,
 		return -EINVAL;
 
 	if (plane_num > MAX_PLANES) {
-		fprintf(stderr, "plane_num(%d) is over MAX_PLANES\n",
+		printf("plane_num(%d) is over MAX_PLANES\n",
 			plane_num);
 		return -EINVAL;
 	}
@@ -1041,7 +1049,7 @@ static void enum_all_supported_resolutions(struct nx_v4l2_entry *e)
 	struct nx_v4l2_frame_info *f;
 	int fd = open(e->devnode, O_RDONLY);
 	if (fd < 0) {
-		fprintf(stderr, "can't open %s", e->devnode);
+		printf("can't open %s", e->devnode);
 		return;
 	}
 	for (i = 0; i < MAX_SUPPORTED_RESOLUTION; i++) {
@@ -1124,5 +1132,27 @@ char *nx_v4l2_get_video_path(int type, uint32_t module)
 	if (entry->exist)
 		return entry->devnode;
 	return NULL;
+}
+
+int nx_v4l2_get_camera_type(char *video, int *mipi, int *interlaced)
+{
+	struct nx_v4l2_entry_cache *cache = &_nx_v4l2_entry_cache;
+	struct nx_v4l2_entry *entry;
+	int i, j, ret = -1;
+
+	if (!cache->cached)
+		enum_all_v4l2_devices();
+	for (j = nx_clipper_video; j <= nx_decimator_video; j++) {
+		for (i = 0; i < MAX_CAMERA_INSTANCE_NUM; i++) {
+			entry = &cache->entries[j][i];
+			if ((entry->exist) && (!strcmp(entry->devnode, video))) {
+				*mipi = nx_v4l2_is_mipi_camera(i);
+				*interlaced = nx_v4l2_is_interlaced_camera(i);
+				ret = 0;
+				break;
+			}
+		}
+	}
+	return ret;
 }
 
