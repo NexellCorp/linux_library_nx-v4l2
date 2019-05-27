@@ -273,7 +273,8 @@ static void enum_camera_sensor(void)
 					e->exist = true;
 				}
 			}
-		}
+		} else
+			fprintf(stderr, "[%s] failed to pen camera sensor info", __func__);
 	}
 }
 
@@ -421,6 +422,12 @@ int nx_v4l2_link(bool link, int module, int src_type, int src_pad,
 	int sink_type, int sink_pad)
 {
 	/* currently not used, just left for build */
+	(void)(link);
+	(void)(module);
+	(void)(src_type);
+	(void)(src_pad);
+	(void)(sink_type);
+	(void)(sink_pad);
 	return 0;
 }
 
@@ -708,6 +715,7 @@ int nx_v4l2_set_ctrl(int fd, int type, uint32_t ctrl_id, int value)
 {
 	struct v4l2_control ctrl;
 
+	(void)(type);
 	bzero(&ctrl, sizeof(ctrl));
 	ctrl.id = ctrl_id;
 	ctrl.value = value;
@@ -720,6 +728,7 @@ int nx_v4l2_get_ctrl(int fd, int type, uint32_t ctrl_id, int *value)
 	int ret;
 	struct v4l2_control ctrl;
 
+	(void)(type);
 	bzero(&ctrl, sizeof(ctrl));
 	ctrl.id = ctrl_id;
 	ret = ioctl(fd, VIDIOC_G_CTRL, &ctrl);
@@ -798,7 +807,7 @@ int nx_v4l2_qbuf(int fd, int type, int plane_num, int index, int *fds,
 		return -EINVAL;
 
 	if (plane_num > MAX_PLANES) {
-		fprintf(stderr, "plane_num(%d) is over MAX_PLANES\n",
+		printf("plane_num(%d) is over MAX_PLANES\n",
 			plane_num);
 		return -EINVAL;
 	}
@@ -1052,7 +1061,7 @@ static void enum_all_supported_resolutions(struct nx_v4l2_entry *e)
 			for (j = 0; j <= V4L2_INTERVAL_MAX; j++) {
 				ret = nx_v4l2_get_frameinterval(fd, f, j);
 				if (ret) {
-					printf("Failed to get interval for width:%d, height:%d\n",
+					fprintf(stderr, "Failed to get interval for width:%d, height:%d\n",
 						f->width, f->height);
 					e->list_count = i;
 					close(fd);
@@ -1124,5 +1133,27 @@ char *nx_v4l2_get_video_path(int type, uint32_t module)
 	if (entry->exist)
 		return entry->devnode;
 	return NULL;
+}
+
+int nx_v4l2_get_camera_type(char *video, int *mipi, int *interlaced)
+{
+	struct nx_v4l2_entry_cache *cache = &_nx_v4l2_entry_cache;
+	struct nx_v4l2_entry *entry;
+	int i, j, ret = -1;
+
+	if (!cache->cached)
+		enum_all_v4l2_devices();
+	for (j = nx_clipper_video; j <= nx_decimator_video; j++) {
+		for (i = 0; i < MAX_CAMERA_INSTANCE_NUM; i++) {
+			entry = &cache->entries[j][i];
+			if ((entry->exist) && (!strcmp(entry->devnode, video))) {
+				*mipi = nx_v4l2_is_mipi_camera(i);
+				*interlaced = nx_v4l2_is_interlaced_camera(i);
+				ret = 0;
+				break;
+			}
+		}
+	}
+	return ret;
 }
 

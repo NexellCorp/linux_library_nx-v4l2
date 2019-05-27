@@ -108,6 +108,7 @@ char *nx_v4l2_get_video_path(int type, uint32_t module);
 void print_all_nx_v4l2_entry(void);
 void nx_v4l2_enumerate(void);
 void nx_v4l2_print_all_video_entry(void);
+int nx_v4l2_get_camera_type(char *video, int *mipi, int *interlaced);
 
 #ifdef __cplusplus
 }
