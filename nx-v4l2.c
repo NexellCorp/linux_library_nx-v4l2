@@ -39,6 +39,7 @@
 
 #include <linux/videodev2.h>
 #include <linux/v4l2-subdev.h>
+#include <linux/v4l2-controls.h>
 #include <linux/media.h>
 
 #include "nx-v4l2.h"
@@ -273,8 +274,7 @@ static void enum_camera_sensor(void)
 					e->exist = true;
 				}
 			}
-		} else
-			fprintf(stderr, "[%s] failed to pen camera sensor info", __func__);
+		}
 	}
 }
 
@@ -1048,11 +1048,14 @@ static void enum_all_supported_resolutions(struct nx_v4l2_entry *e)
 {
 	int i, j, ret;
 	struct nx_v4l2_frame_info *f;
+	uint32_t value;
 	int fd = open(e->devnode, O_RDONLY);
+
 	if (fd < 0) {
 		fprintf(stderr, "can't open %s", e->devnode);
 		return;
 	}
+	nx_v4l2_get_ctrl(fd, get_type_by_name(e->devname), V4L2_CID_NX_CUR_STD, &value);
 	for (i = 0; i < MAX_SUPPORTED_RESOLUTION; i++) {
 		f = &e->lists[i];
 		f->index = i;
