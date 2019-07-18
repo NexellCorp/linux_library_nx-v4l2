@@ -13,12 +13,25 @@ endif
 LOCAL_SRC_FILES := \
 	nx-v4l2.c
 LOCAL_SHARED_LIBRARIES := \
-	liblog \
-	libcutils \
-	libhardware
+	liblog
 LOCAL_C_INCLUDES += \
 	system/core/include/utils \
 	frameworks/native/include \
 	$(call include-path-for)
 
 include $(BUILD_SHARED_LIBRARY)
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := libnx_v4l2
+
+LOCAL_SRC_FILES := \
+	nx-v4l2.c
+LOCAL_STATIC_LIBRARIES := \
+	liblog
+LOCAL_C_INCLUDES += \
+	system/core/include/utils \
+	frameworks/native/include \
+	$(call include-path-for)
+
+include $(BUILD_STATIC_LIBRARY)
