@@ -378,7 +378,9 @@ int nx_v4l2_open_device(int type, int module)
 		int fd = open(entry->devnode, O_RDWR);
 
 		if (fd < 0)
-			fprintf(stderr, "open failed for %s\n", entry->devname);
+			fprintf(stderr, "open failed for %s (%s node is %s)\n",
+					entry->devnode, entry->devnode,
+					(access(entry->devnode, 0) ? "not exist" : "exist"));
 
 		return fd;
 	} else {
@@ -1055,7 +1057,9 @@ static void enum_all_supported_resolutions(struct nx_v4l2_entry *e)
 	int fd = open(e->devnode, O_RDONLY);
 
 	if (fd < 0) {
-		fprintf(stderr, "can't open %s", e->devnode);
+		fprintf(stderr, "can't open %s (%s node is %s)\n",
+				e->devnode, e->devnode,
+				(access(e->devnode, 0) ? "not exist" : "exist"));
 		return;
 	}
 	nx_v4l2_get_ctrl(fd, get_type_by_name(e->devname), V4L2_CID_NX_CUR_STD, &value);
