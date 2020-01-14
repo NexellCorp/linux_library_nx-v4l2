@@ -341,7 +341,11 @@ static int enum_all_v4l2_devices(void)
 		}
 		e->exist = true;
 		strcpy(e->devname, entry_name);
+#ifdef QUICKREAR
+		sprintf(e->devnode, "/dev_q/%s", items[i]->d_name);
+#else
 		sprintf(e->devnode, "/dev/%s", items[i]->d_name);
+#endif
 		if ((get_type_by_name(entry_name) == nx_clipper_video) ||
 				(get_type_by_name(entry_name) == nx_decimator_video))
 			enum_all_supported_resolutions(e);
