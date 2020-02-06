@@ -21,12 +21,7 @@ include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 
-ifdef	QUICKBOOT
-LOCAL_CFLAGS += -DQUICKREAR
-LOCAL_MODULE := libnx_v4l2_q
-else
 LOCAL_MODULE := libnx_v4l2
-endif
 
 LOCAL_SRC_FILES := \
 	nx-v4l2.c
@@ -36,3 +31,19 @@ LOCAL_C_INCLUDES += \
 	$(call include-path-for)
 
 include $(BUILD_STATIC_LIBRARY)
+
+ifdef	QUICKBOOT
+include $(CLEAR_VARS)
+
+LOCAL_CFLAGS += -DQUICKREAR
+LOCAL_MODULE := libnx_v4l2_q
+
+LOCAL_SRC_FILES := \
+	nx-v4l2.c
+LOCAL_C_INCLUDES += \
+	system/core/include/utils \
+	frameworks/native/include \
+	$(call include-path-for)
+
+include $(BUILD_STATIC_LIBRARY)
+endif
