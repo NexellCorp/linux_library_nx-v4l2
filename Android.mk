@@ -32,7 +32,7 @@ LOCAL_C_INCLUDES += \
 
 include $(BUILD_STATIC_LIBRARY)
 
-ifdef	QUICKBOOT
+ifeq ($(PRODUCT_CAR), true)
 include $(CLEAR_VARS)
 
 LOCAL_CFLAGS += -DQUICKREAR
